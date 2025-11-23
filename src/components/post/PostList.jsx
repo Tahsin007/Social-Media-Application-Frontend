@@ -25,7 +25,7 @@ const PostList = ({ posts, loading, hasMore, onLoadMore }) => {
 
   return (
     <div className="post-list">
-      {posts.map((post) => (
+      {posts.filter(post => post).map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
 

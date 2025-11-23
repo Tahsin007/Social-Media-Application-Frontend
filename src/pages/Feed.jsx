@@ -1,5 +1,5 @@
 // src/pages/Feed.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPosts, resetPosts } from '../redux/slices/PostSlice';
 import Navbar from '../components/layout/Navbar';
@@ -10,11 +10,14 @@ import '../../public/assets/css/bootstrap.min.css';
 import '../../public/assets/css/common.css';
 import '../../public/assets/css/main.css';
 import '../../public/assets/css/responsive.css';
+import { logout } from '../redux/slices/authSlice';
 
 const Feed = () => {
   const dispatch = useDispatch();
   const { posts, loading, hasMore, pagination } = useSelector((state) => state.posts);
+  const { user } = useSelector((state) => state.auth);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   useEffect(() => {
     // Reset and fetch initial posts
@@ -35,11 +38,94 @@ const Feed = () => {
     setShowCreatePost(false);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  const toggleProfileDropdown = () => {
+    setProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
   return (
     <div className="_layout _layout_main_wrapper">
-      {/* The Navbar component from your original Feed.jsx will be used here */}
-      <Navbar />
-
+      <nav className="navbar navbar-expand-lg navbar-light _header_nav _padd_t10">
+        <div className="container _custom_container">
+          <div className="_logo_wrap">
+            <a className="navbar-brand" href="/feed">
+              <img src="/assets/images/logo.svg" alt="Image" className="_nav_logo" />
+            </a>
+          </div>
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <div className="_header_form ms-auto">
+              <form className="_header_form_grp">
+                <svg className="_header_form_svg" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 17 17">
+                  <circle cx="7" cy="7" r="6" stroke="#666" />
+                  <path stroke="#666" strokeLinecap="round" d="M16 16l-3-3" />
+                </svg>
+                <input className="form-control me-2 _inpt1" type="search" placeholder="input search text" aria-label="Search" />
+              </form>
+            </div>
+            <ul className="navbar-nav mb-2 mb-lg-0 _header_nav_list ms-auto _mar_r8">
+              <li className="nav-item _header_nav_item">
+                <a className="nav-link _header_nav_link_active _header_nav_link" aria-current="page" href="/feed">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" fill="none" viewBox="0 0 18 21">
+                    <path className="_home_active" stroke="#000" strokeWidth="1.5" strokeOpacity=".6" d="M1 9.924c0-1.552 0-2.328.314-3.01.313-.682.902-1.187 2.08-2.196l1.143-.98C6.667 1.913 7.732 1 9 1c1.268 0 2.333.913 4.463 2.738l1.142.98c1.179 1.01 1.768 1.514 2.081 2.196.314.682.314 1.458.314 3.01v4.846c0 2.155 0 3.233-.67 3.902-.669.67-1.746.67-3.901.67H5.57c-2.155 0-3.232 0-3.902-.67C1 18.002 1 16.925 1 14.77V9.924z" />
+                    <path className="_home_active" stroke="#000" strokeOpacity=".6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.857 19.341v-5.857a1 1 0 00-1-1H7.143a1 1 0 00-1 1v5.857" />
+                  </svg>
+                </a>
+              </li>
+              {/* Other nav items can be added here */}
+            </ul>
+            <div className="_header_nav_profile">
+              <div className="_header_nav_profile_image">
+                <img src={user?.profilePictureUrl || "/assets/images/profile.png"} alt="Image" className="_nav_profile_img" />
+              </div>
+              <div className="_header_nav_dropdown" onClick={toggleProfileDropdown}>
+                <p className="_header_nav_para">{user ? `${user.firstName} ${user.lastName}` : 'Guest'}</p>
+                <button id="_profile_drop_show_btn" className="_header_nav_dropdown_btn _dropdown_toggle" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" fill="none" viewBox="0 0 10 6">
+                    <path fill="#112032" d="M5 5l.354.354L5 5.707l-.354-.353L5 5zm4.354-3.646l-4 4-.708-.708 4-4 .708.708zm-4.708 4l-4-4 .708-.708 4 4-.708.708z" />
+                  </svg>
+                </button>
+              </div>
+              <div id="_prfoile_drop" className={`_nav_profile_dropdown _profile_dropdown ${isProfileDropdownOpen ? 'show' : ''}`}>
+                <div className="_nav_profile_dropdown_info">
+                  <div className="_nav_profile_dropdown_image">
+                    <img src={user?.profilePictureUrl || "/assets/images/profile.png"} alt="Image" className="_nav_drop_img" />
+                  </div>
+                  <div className="_nav_profile_dropdown_info_txt">
+                    <h4 className="_nav_dropdown_title">{user ? `${user.firstName} ${user.lastName}` : 'Guest'}</h4>
+                    <a href="/profile" className="_nav_drop_profile">
+                      View Profile
+                    </a>
+                  </div>
+                </div>
+                <hr />
+                <ul className="_nav_dropdown_list">
+                  {/* Other dropdown items */}
+                  <li className="_nav_dropdown_list_item">
+                    <a href="#" onClick={handleLogout} className="_nav_dropdown_link">
+                      <div className="_nav_drop_info">
+                        <span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
+                            <path stroke="#377DFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6.667 18H2.889A1.889 1.889 0 011 16.111V2.89A1.889 1.889 0 012.889 1h3.778M13.277 14.222L18 9.5l-4.723-4.722M18 9.5H6.667" />
+                          </svg>
+                        </span>
+                        Log Out
+                      </div>
+                      <button type="submit" className="_nav_drop_btn_link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="6" height="10" fill="none" viewBox="0 0 6 10">
+                          <path fill="#112032" d="M5 5l.354.354L5.707 5l-.353-.354L5 5zM1.354 9.354l4-4-.708-.708-4 4 .708.708zm4-4.708l-4-4-.708.708 4 4 .708-.708z" opacity=".5" />
+                        </svg>
+                      </button>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
       <div className="_main_layout">
         <div className="container _custom_container">
           <div className="_layout_inner_wrap">
@@ -235,18 +321,41 @@ const Feed = () => {
                     </div>
 
                     {/* Create Post Section */}
-                    <div className="create-post-section _feed_inner_text_area  _b_radious6 _padd_b24 _padd_t24 _padd_r24 _padd_l24 _mar_b16">
+                    <div className="_feed_inner_text_area  _b_radious6 _padd_b24 _padd_t24 _padd_r24 _padd_l24 _mar_b16">
                       {!showCreatePost ? (
-                        <div className="_feed_inner_text_area_box" onClick={() => setShowCreatePost(true)}>
-                          <div className="_feed_inner_text_area_box_image">
-                            <img src="/assets/images/txt_img.png" alt="Image" className="_txt_img" />
-                          </div>
-                          <div className="form-floating _feed_inner_text_area_box_form ">
-                            <div className="_feed_textarea_label">
-                              What's on your mind?
+                        <>
+                          <div className="_feed_inner_text_area_box" onClick={() => setShowCreatePost(true)}>
+                            <div className="_feed_inner_text_area_box_image">
+                              <img src={user?.profilePictureUrl || "/assets/images/txt_img.png"} alt="Image" className="_txt_img" />
+                            </div>
+                            <div className="form-floating _feed_inner_text_area_box_form ">
+                              <div className="_feed_textarea_label">
+                                Write something ...
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="24" fill="none" viewBox="0 0 23 24">
+                                  <path fill="#666" d="M19.504 19.209c.332 0 .601.289.601.646 0 .326-.226.596-.52.64l-.081.005h-6.276c-.332 0-.602-.289-.602-.645 0-.327.227-.597.52-.64l.082-.006h6.276zM13.4 4.417c1.139-1.223 2.986-1.223 4.125 0l1.182 1.268c1.14 1.223 1.14 3.205 0 4.427L9.82 19.649a2.619 2.619 0 01-1.916.85h-3.64c-.337 0-.61-.298-.6-.66l.09-3.941a3.019 3.019 0 01.794-1.982l8.852-9.5zm-.688 2.562l-7.313 7.85a1.68 1.68 0 00-.441 1.101l-.077 3.278h3.023c.356 0 .698-.133.968-.376l.098-.096 7.35-7.887-3.608-3.87zm3.962-1.65a1.633 1.633 0 00-2.423 0l-.688.737 3.606 3.87.688-.737c.631-.678.666-1.755.105-2.477l-.105-.124-1.183-1.268z" />
+                                </svg>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                          <div className="_feed_inner_text_area_bottom">
+                            <div className="_feed_inner_text_area_item">
+                              <div className="_feed_inner_text_area_bottom_photo _feed_common">
+                                <button type="button" className="_feed_inner_text_area_bottom_photo_link" onClick={() => setShowCreatePost(true)}>
+                                  <span className="_feed_inner_text_area_bottom_photo_iamge _mar_img">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 20 20"><path fill="#666" d="M13.916 0c3.109 0 5.18 2.429 5.18 5.914v8.17c0 3.486-2.072 5.916-5.18 5.916H5.999C2.89 20 .827 17.572.827 14.085v-8.17C.827 2.43 2.897 0 6 0h7.917zm0 1.504H5.999c-2.321 0-3.799 1.735-3.799 4.41v8.17c0 2.68 1.472 4.412 3.799 4.412h7.917c2.328 0 3.807-1.734 3.807-4.411v-8.17c0-2.678-1.478-4.411-3.807-4.411zm.65 8.68l.12.125 1.9 2.147a.803.803 0 01-.016 1.063.642.642 0 01-.894.058l-.076-.074-1.9-2.148a.806.806 0 00-1.205-.028l-.074.087-2.04 2.717c-.722.963-2.02 1.066-2.86.26l-.111-.116-.814-.91a.562.562 0 00-.793-.07l-.075.073-1.4 1.617a.645.645 0 01-.97.029.805.805 0 01-.09-.977l.064-.086 1.4-1.617c.736-.852 1.95-.897 2.734-.137l.114.12.81.905a.587.587 0 00.861.033l.07-.078 2.04-2.718c.81-1.08 2.27-1.19 3.205-.275zM6.831 4.64c1.265 0 2.292 1.125 2.292 2.51 0 1.386-1.027 2.511-2.292 2.511S4.54 8.537 4.54 7.152c0-1.386 1.026-2.51 2.291-2.51zm0 1.504c-.507 0-.918.451-.918 1.007 0 .555.411 1.006.918 1.006.507 0 .919-.451.919-1.006 0-.556-.412-1.007-.919-1.007z" /></svg>
+                                  </span>Photo
+                                </button>
+                              </div>
+                              {/* Other icons */}
+                            </div>
+                            <div className="_feed_inner_text_area_btn">
+                              <button type="button" className="_feed_inner_text_area_btn_link" onClick={() => setShowCreatePost(true)}>
+                                <svg className="_mar_img" xmlns="http://www.w3.org/2000/svg" width="14" height="13" fill="none" viewBox="0 0 14 13"><path fill="#fff" fillRule="evenodd" d="M6.37 7.879l2.438 3.955a.335.335 0 00.34.162c.068-.01.23-.05.289-.247l3.049-10.297a.348.348 0 00-.09-.35.341.341 0 00-.34-.088L1.75 4.03a.34.34 0 00-.247.289.343.343 0 00.16.347L5.666 7.17 9.2 3.597a.5.5 0 01.712.703L6.37 7.88zM9.097 13c-.464 0-.89-.236-1.14-.641L5.372 8.165l-4.237-2.65a1.336 1.336 0 01-.622-1.331c.074-.536.441-.96.957-1.112L11.774.054a1.347 1.347 0 011.67 1.682l-3.05 10.296A1.332 1.332 0 019.098 13z" clipRule="evenodd" /></svg>
+                                <span>Post</span>
+                              </button>
+                            </div>
+                          </div>
+                        </>
                       ) : (
                         <CreatePost
                           onPostCreated={handlePostCreated}
@@ -300,7 +409,7 @@ const Feed = () => {
                     </div>
                   </div>
                   <div className="_layout_right_sidebar_inner">
-                    <div className="_feed_right_inner_area_card  _padd_t24  _padd_b6 _padd_r24 _padd_l24 _b_radious6 _feed_inner_area">
+                    <div className="_feed_right_inner_area_card _padd_b6 _b_radious6 _feed_inner_area">
                       <div className="_feed_top_fixed">
                         <div className="_feed_right_inner_area_card_content _mar_b24">
                           <h4 className="_feed_right_inner_area_card_content_title _title5">Your Friends</h4>
