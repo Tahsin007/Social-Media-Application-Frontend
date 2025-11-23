@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { register, clearError } from '../redux/slices/authSlice';
-import '../index.css';
+import '../../public/assets/css/responsive.css';
+import '../../public/assets/css/main.css';
+import '../../public/assets/css/common.css';
+import '../../public/assets/css/bootstrap.min.css';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -31,37 +34,37 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required';
     } else if (formData.firstName.length > 50) {
       newErrors.firstName = 'First name must not exceed 50 characters';
     }
-    
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
     } else if (formData.lastName.length > 50) {
       newErrors.lastName = 'Last name must not exceed 50 characters';
     }
-    
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +86,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -99,116 +102,108 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-card">
-        <div className="register-header">
-          <h1>Create Account</h1>
-          <p>Sign up to get started</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="register-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                placeholder="Enter first name"
-                className={errors.firstName ? 'error' : ''}
-                disabled={loading}
-              />
-              {errors.firstName && (
-                <span className="error-message">{errors.firstName}</span>
-              )}
+    <section className="_social_registration_wrapper _layout_main_wrapper">
+      <div className="_shape_one">
+        <img src="/assets/images/shape1.svg" alt="" className="_shape_img" />
+        <img src="/assets/images/dark_shape.svg" alt="" className="_dark_shape" />
+      </div>
+      <div className="_shape_two">
+        <img src="/assets/images/shape2.svg" alt="" className="_shape_img" />
+        <img src="/assets/images/dark_shape1.svg" alt="" className="_dark_shape _dark_shape_opacity" />
+      </div>
+      <div className="_shape_three">
+        <img src="/assets/images/shape3.svg" alt="" className="_shape_img" />
+        <img src="/assets/images/dark_shape2.svg" alt="" className="_dark_shape _dark_shape_opacity" />
+      </div>
+      <div className="_social_registration_wrap">
+        <div className="container">
+          <div className="row align-items-center">
+            <div className="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+              <div className="_social_registration_right">
+                <div className="_social_registration_right_image">
+                  <img src="/assets/images/registration.png" alt="Image" />
+                </div>
+                <div className="_social_registration_right_image_dark">
+                  <img src="/assets/images/registration1.png" alt="Image" />
+                </div>
+              </div>
             </div>
+            <div className="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+              <div className="_social_registration_content">
+                <div className="_social_registration_right_logo _mar_b28">
+                  <img src="/assets/images/logo.svg" alt="Image" className="_right_logo" />
+                </div>
+                <p className="_social_registration_content_para _mar_b8">Get Started Now</p>
+                <h4 className="_social_registration_content_title _titl4 _mar_b50">Registration</h4>
+                <button type="button" className="_social_registration_content_btn _mar_b40">
+                  <img src="/assets/images/google.svg" alt="Image" className="_google_img" /> <span>Register with google</span>
+                </button>
+                <div className="_social_registration_content_bottom_txt _mar_b40"> <span>Or</span></div>
 
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Enter last name"
-                className={errors.lastName ? 'error' : ''}
-                disabled={loading}
-              />
-              {errors.lastName && (
-                <span className="error-message">{errors.lastName}</span>
-              )}
+                <form onSubmit={handleSubmit} className="_social_registration_form">
+                  <div className="row">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label htmlFor="firstName" className="_social_registration_label _mar_b8">First Name</label>
+                        <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={`form-control _social_registration_input ${errors.firstName ? 'error' : ''}`} disabled={loading} />
+                        {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                      </div>
+                    </div>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label htmlFor="lastName" className="_social_registration_label _mar_b8">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={`form-control _social_registration_input ${errors.lastName ? 'error' : ''}`} disabled={loading} />
+                        {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                      </div>
+                    </div>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label htmlFor="email" className="_social_registration_label _mar_b8">Email</label>
+                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={`form-control _social_registration_input ${errors.email ? 'error' : ''}`} disabled={loading} />
+                        {errors.email && <span className="error-message">{errors.email}</span>}
+                      </div>
+                    </div>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label htmlFor="password" className="_social_registration_label _mar_b8">Password</label>
+                        <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} className={`form-control _social_registration_input ${errors.password ? 'error' : ''}`} disabled={loading} />
+                        {errors.password && <span className="error-message">{errors.password}</span>}
+                      </div>
+                    </div>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label htmlFor="confirmPassword" className="_social_registration_label _mar_b8">Repeat Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={`form-control _social_registration_input ${errors.confirmPassword ? 'error' : ''}`} disabled={loading} />
+                        {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {error && <div className="error-alert">{error}</div>}
+
+                  <div className="row">
+                    <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
+                      <div className="_social_registration_form_btn _mar_t40 _mar_b60">
+                        <button type="submit" className="_social_registration_form_btn_link _btn1" disabled={loading}>
+                          {loading ? 'Creating Account...' : 'Create Account'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div className="row">
+                  <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <div className="_social_registration_bottom_txt">
+                      <p className="_social_registration_bottom_txt_para">Already have an account? <Link to="/login">Sign In</Link></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className={errors.email ? 'error' : ''}
-              disabled={loading}
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password"
-              className={errors.password ? 'error' : ''}
-              disabled={loading}
-            />
-            {errors.password && (
-              <span className="error-message">{errors.password}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              className={errors.confirmPassword ? 'error' : ''}
-              disabled={loading}
-            />
-            {errors.confirmPassword && (
-              <span className="error-message">{errors.confirmPassword}</span>
-            )}
-          </div>
-
-          {error && <div className="error-alert">{error}</div>}
-
-          <button type="submit" className="register-button" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="register-footer">
-          <p>
-            Already have an account?{' '}
-            <Link to="/login" className="login-link">
-              Sign In
-            </Link>
-          </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
