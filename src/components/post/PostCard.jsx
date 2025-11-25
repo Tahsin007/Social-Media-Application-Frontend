@@ -1,25 +1,47 @@
 // ==========================================
 // src/components/post/PostCard.jsx
 // ==========================================
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
+import { postApi } from '../../api/postApi';
 import '../../index.css';
 
 const PostCard = ({ post }) => {
     const { user: currentUser } = useSelector((state) => state.auth);
-    const [isLiked, setIsLiked] = useState(false); // Placeholder state
+    const [isLiked, setIsLiked] = useState(post?.isLikedByCurrentUser || false);
+    const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    useEffect(() => {
+        setIsLiked(post?.isLikedByCurrentUser || false);
+        setLikeCount(post?.likeCount || 0);
+    }, [post]);
 
     if (!post) {
         return null;
     }
 
-    const { author, content, imageUrl, createdAt, isPublic, likesCount = 0, commentsCount = 0 } = post;
+    const { author, content, imageUrl, createdAt, isPublic, commentsCount = 0 } = post;
 
-    const handleLike = () => {
+    const handleLike = async () => {
+        const originalIsLiked = isLiked;
+        const originalLikeCount = likeCount;
+
         setIsLiked(!isLiked);
-        // In a real app, you would dispatch an action here to update the like status on the server.
+        setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+
+        try {
+           const response = await postApi.toggleLike(post.id);
+           if(response.data){
+            setIsLiked(response.data.isLikedByCurrentUser);
+            setLikeCount(response.data.likeCount);
+           }
+        } catch (error) {
+            console.error('Failed to toggle like:', error);
+            setIsLiked(originalIsLiked);
+            setLikeCount(originalLikeCount);
+        }
     };
 
     const isOwnPost = currentUser && author && currentUser.id === author.id;
@@ -80,7 +102,7 @@ const PostCard = ({ post }) => {
                 <div className="_feed_inner_timeline_total_reacts_image">
                     <img src="/assets/images/react_img1.png" alt="Image" className="_react_img1" />
                     <img src="/assets/images/react_img2.png" alt="Image" className="_react_img" />
-                    <p className="_feed_inner_timeline_total_reacts_para">{isLiked ? likesCount + 1 : likesCount}</p>
+                    <p className="_feed_inner_timeline_total_reacts_para">{likeCount}</p>
                 </div>
                 <div className="_feed_inner_timeline_total_reacts_txt">
                     <p className="_feed_inner_timeline_total_reacts_para1">
