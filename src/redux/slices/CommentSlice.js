@@ -14,8 +14,10 @@ export const fetchCommentsByPost = createAsyncThunk(
   'comments/fetchByPost',
   async (postId, { rejectWithValue }) => {
     try {
-      const response = await commentApi.getCommentsByPost(postId);
-      return { postId, comments: response.data };
+      console.log("postId from comment slice : ", postId);
+      const comments = await commentApi.getCommentsByPost(postId);
+      console.log("comments from comment slice : ", comments);
+      return { postId, comments: comments };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message);
     }
@@ -26,9 +28,10 @@ export const createComment = createAsyncThunk(
   'comments/create',
   async ({ postId, commentData }, { rejectWithValue }) => {
     try {
+      console.log("commentData and postId : ", postId, commentData);
       const response = await commentApi.createComment(postId, commentData);
       toast.success('Comment added successfully!');
-      return { postId, comment: response.data };
+      return { postId: postId, comment: response.data };
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to add comment';
       toast.error(message);
@@ -81,7 +84,7 @@ export const toggleCommentLike = createAsyncThunk(
 
 export const replyToComment = createAsyncThunk(
   'comments/reply',
-  async ({ postId, commentId, replyData }, { rejectWithValue }) => {
+  async ({ postId, parentCommentId: commentId, replyData }, { rejectWithValue }) => {
     try {
       const response = await commentApi.replyToComment(commentId, replyData);
       toast.success('Reply added successfully!');
@@ -146,7 +149,7 @@ const commentSlice = createSlice({
       .addCase(updateComment.fulfilled, (state, action) => {
         const updatedComment = action.payload;
         const postId = updatedComment.postId;
-        
+
         if (state.commentsByPost[postId]) {
           const updateCommentInList = (comments) => {
             return comments.map(comment => {
@@ -165,7 +168,7 @@ const commentSlice = createSlice({
       // Delete comment
       .addCase(deleteComment.fulfilled, (state, action) => {
         const { postId, commentId } = action.payload;
-        
+
         if (state.commentsByPost[postId]) {
           const removeCommentFromList = (comments) => {
             return comments.filter(comment => {
@@ -184,7 +187,7 @@ const commentSlice = createSlice({
       // Toggle like
       .addCase(toggleCommentLike.fulfilled, (state, action) => {
         const { postId, comment: updatedComment } = action.payload;
-        
+
         if (state.commentsByPost[postId]) {
           const updateCommentLike = (comments) => {
             return comments.map(comment => {
@@ -203,7 +206,7 @@ const commentSlice = createSlice({
       // Reply to comment
       .addCase(replyToComment.fulfilled, (state, action) => {
         const { postId, reply } = action.payload;
-        
+
         if (state.commentsByPost[postId]) {
           const addReplyToComment = (comments) => {
             return comments.map(comment => {

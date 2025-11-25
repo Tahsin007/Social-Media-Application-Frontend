@@ -1,22 +1,26 @@
 // ==========================================
 // src/components/post/PostCard.jsx
 // ==========================================
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useState, useEffect, } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
 import { postApi } from '../../api/postApi';
+import CommentSection from '../comment/CommentSection';
 import '../../index.css';
+import { fetchCommentsByPost } from '../../redux/slices/CommentSlice';
 
 const PostCard = ({ post }) => {
     const { user: currentUser } = useSelector((state) => state.auth);
     const [isLiked, setIsLiked] = useState(post?.isLikedByCurrentUser || false);
     const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showComments, setShowComments] = useState(false);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         setIsLiked(post?.isLikedByCurrentUser || false);
         setLikeCount(post?.likeCount || 0);
-    }, [post]);
+    }, [post?.isLikedByCurrentUser, post?.likeCount]);
 
     if (!post) {
         return null;
@@ -32,11 +36,11 @@ const PostCard = ({ post }) => {
         setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
         try {
-           const response = await postApi.toggleLike(post.id);
-           if(response.data){
-            setIsLiked(response.data.isLikedByCurrentUser);
-            setLikeCount(response.data.likeCount);
-           }
+            const response = await postApi.toggleLike(post.id);
+            if (response.data) {
+                setIsLiked(response.data.isLikedByCurrentUser);
+                setLikeCount(response.data.likeCount);
+            }
         } catch (error) {
             console.error('Failed to toggle like:', error);
             setIsLiked(originalIsLiked);
@@ -45,6 +49,16 @@ const PostCard = ({ post }) => {
     };
 
     const isOwnPost = currentUser && author && currentUser.id === author.id;
+
+    const handleToggleComments = () => {
+        const newShowComments = !showComments;
+        setShowComments(newShowComments);
+        console.log(newShowComments);
+        console.log(post.id);
+        if (newShowComments) {
+            dispatch(fetchCommentsByPost(post.id));
+        }
+    };
 
     const toggleDropdown = () => setShowDropdown(!showDropdown);
 
@@ -106,7 +120,7 @@ const PostCard = ({ post }) => {
                 </div>
                 <div className="_feed_inner_timeline_total_reacts_txt">
                     <p className="_feed_inner_timeline_total_reacts_para1">
-                        <a href="#0"><span>{commentsCount}</span> Comment</a>
+                        <a href="#0" onClick={handleToggleComments}><span>{post.commentCount}</span> Comment</a>
                     </p>
                     <p className="_feed_inner_timeline_total_reacts_para2"><span>0</span> Share</p>
                 </div>
@@ -124,7 +138,7 @@ const PostCard = ({ post }) => {
                         </span>
                     </span>
                 </button>
-                <button className="_feed_inner_timeline_reaction_comment _feed_reaction">
+                <button onClick={handleToggleComments} className="_feed_inner_timeline_reaction_comment _feed_reaction">
                     <span className="_feed_inner_timeline_reaction_link">
                         <span>
                             <svg className="_reaction_svg" xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21">
@@ -146,6 +160,7 @@ const PostCard = ({ post }) => {
                     </span>
                 </button>
             </div>
+            {showComments && <CommentSection post={post} />}
         </div>
     );
 };

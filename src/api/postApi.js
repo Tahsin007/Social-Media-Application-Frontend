@@ -14,6 +14,7 @@ export const postApi = {
     const response = await axiosInstance.get('/posts', {
       params: { page, size },
     });
+    console.log("Post Response : ",response.data);
     return response.data;
   },
 

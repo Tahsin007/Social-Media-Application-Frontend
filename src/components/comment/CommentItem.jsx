@@ -6,7 +6,7 @@ import CommentForm from './CommentForm';
 import { formatDistanceToNow } from 'date-fns';
 import './CommentItem.css';
 
-const CommentItem = ({ comment, postId, isReply = false }) => {
+const CommentItem = ({ comment, post, isReply = false }) => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
     const [showReplyForm, setShowReplyForm] = useState(false);
@@ -16,7 +16,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
 
     const handleLike = async () => {
         try {
-            await dispatch(toggleCommentLike({ postId, commentId: comment.id })).unwrap();
+            await dispatch(toggleCommentLike({ postId: post.id, commentId: comment.id })).unwrap();
         } catch (error) {
             console.error('Failed to toggle like:', error);
         }
@@ -25,7 +25,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this comment?')) {
             try {
-                await dispatch(deleteComment({ postId, commentId: comment.id })).unwrap();
+                await dispatch(deleteComment({ postId: post.id, commentId: comment.id })).unwrap();
             } catch (error) {
                 console.error('Failed to delete comment:', error);
             }
@@ -106,7 +106,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
 
                 {showReplyForm && (
                     <CommentForm
-                        postId={postId}
+                        post={post}
                         parentCommentId={comment.id}
                         onCommentSubmitted={handleReplySubmitted}
                         placeholder="Write a reply..."
@@ -119,7 +119,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
                             <CommentItem
                                 key={reply.id}
                                 comment={reply}
-                                postId={postId}
+                                post={post}
                                 isReply={true}
                             />
                         ))}

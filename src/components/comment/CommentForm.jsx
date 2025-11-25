@@ -4,7 +4,7 @@ import { createComment, replyToComment } from '../../redux/slices/CommentSlice';
 import './CommentForm.css';
 
 const CommentForm = ({
-    postId,
+    post,
     parentCommentId = null,
     onCommentSubmitted,
     placeholder = "Write a comment..."
@@ -25,14 +25,15 @@ const CommentForm = ({
             if (parentCommentId) {
                 // This is a reply
                 await dispatch(replyToComment({
-                    postId,
-                    commentId: parentCommentId,
+                    postId: post.id,
+                    parentCommentId: parentCommentId,
                     replyData: { content: content.trim() },
                 })).unwrap();
             } else {
+                console.log("This is a top-level comment for post-id:", post.id);
                 // This is a top-level comment
                 await dispatch(createComment({
-                    postId,
+                    postId: post.id,
                     commentData: { content: content.trim() },
                 })).unwrap();
             }

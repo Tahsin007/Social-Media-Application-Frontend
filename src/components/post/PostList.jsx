@@ -1,6 +1,4 @@
-// ==========================================
-// src/components/post/PostList.jsx
-// ==========================================
+
 import PostCard from './PostCard';
 import '../../index.css';
 
