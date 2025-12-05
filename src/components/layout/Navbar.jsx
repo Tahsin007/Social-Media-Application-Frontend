@@ -1,21 +1,12 @@
 // src/components/layout/Navbar.jsx
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../../redux/slices/authSlice';
+import { useAuth } from '../../hooks/useAuth';
 import '../../index.css';
 
 const Navbar = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    try {
-      await dispatch(logout()).unwrap();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+    logout();
   };
 
   return (

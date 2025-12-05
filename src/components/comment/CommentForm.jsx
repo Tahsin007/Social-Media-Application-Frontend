@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { createComment, replyToComment } from '../../redux/slices/CommentSlice';
+import { useCommentMutations } from '../../hooks/useComments';
 import './CommentForm.css';
 
 const CommentForm = ({
     post,
     parentCommentId = null,
     onCommentSubmitted,
-    placeholder = "Write a comment..."
+    placeholder = "Write a comment...",
 }) => {
-    const dispatch = useDispatch();
+    const { createComment, replyToComment, isCreatingComment, isReplyingToComment } =
+        useCommentMutations();
     const [content, setContent] = useState('');
-    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,22 +19,20 @@ const CommentForm = ({
             return;
         }
 
-        setLoading(true);
         try {
             if (parentCommentId) {
                 // This is a reply
-                await dispatch(replyToComment({
+                await replyToComment({
                     postId: post.id,
                     parentCommentId: parentCommentId,
                     replyData: { content: content.trim() },
-                })).unwrap();
+                });
             } else {
-                console.log("This is a top-level comment for post-id:", post.id);
                 // This is a top-level comment
-                await dispatch(createComment({
+                await createComment({
                     postId: post.id,
                     commentData: { content: content.trim() },
-                })).unwrap();
+                });
             }
 
             setContent('');
@@ -45,7 +42,6 @@ const CommentForm = ({
         } catch (error) {
             console.error('Failed to submit comment:', error);
         } finally {
-            setLoading(false);
         }
     };
 
@@ -57,14 +53,14 @@ const CommentForm = ({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows="2"
-                disabled={loading}
+                disabled={isCreatingComment || isReplyingToComment}
             />
             <button
                 type="submit"
                 className="comment-submit-button"
-                disabled={loading || !content.trim()}
+                disabled={isCreatingComment || isReplyingToComment || !content.trim()}
             >
-                {loading ? 'Posting...' : 'Post'}
+                {isCreatingComment || isReplyingToComment ? 'Posting...' : 'Post'}
             </button>
         </form>
     );

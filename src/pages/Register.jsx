@@ -1,17 +1,12 @@
 // src/pages/Register.jsx
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { register, clearError } from '../redux/slices/authSlice';
-import '../../public/assets/css/responsive.css';
-import '../../public/assets/css/main.css';
-import '../../public/assets/css/common.css';
-import '../../public/assets/css/bootstrap.min.css';
+import { useAuth } from '../hooks/useAuth';
+import { toast } from 'react-toastify';
 
 const Register = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, isAuthenticated, error } = useSelector((state) => state.auth);
+  const { register, isRegistering, registerError, isRegisterError, user } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -21,16 +16,19 @@ const Register = () => {
     confirmPassword: '',
   });
 
-  const [errors, setErrors] = useState({});
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       navigate('/feed');
     }
-    return () => {
-      dispatch(clearError());
-    };
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (isRegisterError && registerError) {
+      toast.error(registerError.response?.data?.message || 'Registration failed');
+    }
+  }, [isRegisterError, registerError]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -65,7 +63,7 @@ const Register = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    setErrors(newErrors);
+    setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -75,9 +73,9 @@ const Register = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors((prev) => ({
+
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
         ...prev,
         [name]: '',
       }));
@@ -93,12 +91,7 @@ const Register = () => {
 
     const { confirmPassword, ...registrationData } = formData;
 
-    try {
-      await dispatch(register(registrationData)).unwrap();
-      navigate('/feed');
-    } catch (err) {
-      console.error('Registration failed:', err);
-    }
+    register(registrationData);
   };
 
   return (
@@ -145,47 +138,45 @@ const Register = () => {
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label htmlFor="firstName" className="_social_registration_label _mar_b8">First Name</label>
-                        <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={`form-control _social_registration_input ${errors.firstName ? 'error' : ''}`} disabled={loading} />
-                        {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                        <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={`form-control _social_registration_input ${formErrors.firstName ? 'error' : ''}`} disabled={isRegistering} />
+                        {formErrors.firstName && <span className="error-message">{formErrors.firstName}</span>}
                       </div>
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label htmlFor="lastName" className="_social_registration_label _mar_b8">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={`form-control _social_registration_input ${errors.lastName ? 'error' : ''}`} disabled={loading} />
-                        {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                        <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={`form-control _social_registration_input ${formErrors.lastName ? 'error' : ''}`} disabled={isRegistering} />
+                        {formErrors.lastName && <span className="error-message">{formErrors.lastName}</span>}
                       </div>
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label htmlFor="email" className="_social_registration_label _mar_b8">Email</label>
-                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={`form-control _social_registration_input ${errors.email ? 'error' : ''}`} disabled={loading} />
-                        {errors.email && <span className="error-message">{errors.email}</span>}
+                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={`form-control _social_registration_input ${formErrors.email ? 'error' : ''}`} disabled={isRegistering} />
+                        {formErrors.email && <span className="error-message">{formErrors.email}</span>}
                       </div>
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label htmlFor="password" className="_social_registration_label _mar_b8">Password</label>
-                        <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} className={`form-control _social_registration_input ${errors.password ? 'error' : ''}`} disabled={loading} />
-                        {errors.password && <span className="error-message">{errors.password}</span>}
+                        <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} className={`form-control _social_registration_input ${formErrors.password ? 'error' : ''}`} disabled={isRegistering} />
+                        {formErrors.password && <span className="error-message">{formErrors.password}</span>}
                       </div>
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label htmlFor="confirmPassword" className="_social_registration_label _mar_b8">Repeat Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={`form-control _social_registration_input ${errors.confirmPassword ? 'error' : ''}`} disabled={loading} />
-                        {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                        <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={`form-control _social_registration_input ${formErrors.confirmPassword ? 'error' : ''}`} disabled={isRegistering} />
+                        {formErrors.confirmPassword && <span className="error-message">{formErrors.confirmPassword}</span>}
                       </div>
                     </div>
                   </div>
 
-                  {error && <div className="error-alert">{error}</div>}
-
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_registration_form_btn _mar_t40 _mar_b60">
-                        <button type="submit" className="_social_registration_form_btn_link _btn1" disabled={loading}>
-                          {loading ? 'Creating Account...' : 'Create Account'}
+                        <button type="submit" className="_social_registration_form_btn_link _btn1" disabled={isRegistering}>
+                          {isRegistering ? 'Creating Account...' : 'Create Account'}
                         </button>
                       </div>
                     </div>

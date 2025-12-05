@@ -1,35 +1,32 @@
 // src/pages/Login.jsx
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, clearError } from '../redux/slices/authSlice';
+import { useAuth } from '../hooks/useAuth';
 import '../index.css';
-import '../../public/assets/css/responsive.css';
-import '../../public/assets/css/main.css';
-import '../../public/assets/css/common.css';
-import '../../public/assets/css/bootstrap.min.css';
-
+import { toast } from 'react-toastify';
 
 const Login = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, isAuthenticated, error } = useSelector((state) => state.auth);
-
+  const { login, isLoggingIn, loginError, isLoginError, user } = useAuth();
+  console.log("Token:", localStorage.getItem('accessToken'));
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
-  const [errors, setErrors] = useState({});
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       navigate('/feed');
     }
-    return () => {
-      dispatch(clearError());
-    };
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (isLoginError && loginError) {
+      toast.error(loginError.response?.data?.message || 'Login failed');
+    }
+  }, [isLoginError, loginError]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -46,7 +43,7 @@ const Login = () => {
       newErrors.password = 'Password must be at least 8 characters';
     }
 
-    setErrors(newErrors);
+    setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -56,9 +53,9 @@ const Login = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors((prev) => ({
+
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
         ...prev,
         [name]: '',
       }));
@@ -72,12 +69,8 @@ const Login = () => {
       return;
     }
 
-    try {
-      await dispatch(login(formData)).unwrap();
-      navigate('/feed');
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
+    // The useAuth hook handles navigation on success and errors.
+    login(formData);
   };
 
   return (
@@ -127,10 +120,10 @@ const Login = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className={`form-control _social_login_input ${errors.email ? 'error' : ''}`}
-                          disabled={loading}
+                          className={`form-control _social_login_input ${formErrors.email ? 'error' : ''}`}
+                          disabled={isLoggingIn}
                         />
-                        {errors.email && <span className="error-message">{errors.email}</span>}
+                        {formErrors.email && <span className="error-message">{formErrors.email}</span>}
                       </div>
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -142,19 +135,17 @@ const Login = () => {
                           name="password"
                           value={formData.password}
                           onChange={handleChange}
-                          className={`form-control _social_login_input ${errors.password ? 'error' : ''}`}
-                          disabled={loading}
+                          className={`form-control _social_login_input ${formErrors.password ? 'error' : ''}`}
+                          disabled={isLoggingIn}
                         />
-                        {errors.password && <span className="error-message">{errors.password}</span>}
+                        {formErrors.password && <span className="error-message">{formErrors.password}</span>}
                       </div>
                     </div>
                   </div>
 
-                  {error && <div className="error-alert">{error}</div>}
-
                   <div className="_social_login_form_btn _mar_t40 _mar_b60">
-                    <button type="submit" className="_social_login_form_btn_link _btn1" disabled={loading}>
-                      {loading ? 'Signing in...' : 'Login now'}
+                    <button type="submit" className="_social_login_form_btn_link _btn1" disabled={isLoggingIn}>
+                      {isLoggingIn ? 'Signing in...' : 'Login now'}
                     </button>
                   </div>
                 </form>

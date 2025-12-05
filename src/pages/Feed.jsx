@@ -1,45 +1,33 @@
 // src/pages/Feed.jsx
-import { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchPosts, resetPosts } from '../redux/slices/PostSlice';
-import Navbar from '../components/layout/Navbar';
+import { useState, useMemo } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useFetchPosts } from '../hooks/usePosts';
 import CreatePost from '../components/post/CreatePost';
-import PostList from '../components/post/PostList'; // This will be used inside the new structure
-// import '../index.css';
-import '../../public/assets/css/bootstrap.min.css';
-import '../../public/assets/css/common.css';
-import '../../public/assets/css/main.css';
-import '../../public/assets/css/responsive.css';
-import { logout } from '../redux/slices/authSlice';
+import PostList from '../components/post/PostList';
+import '../index.css';
 
 const Feed = () => {
-  const dispatch = useDispatch();
-  const { posts, loading, hasMore, pagination } = useSelector((state) => state.posts);
-  const { user } = useSelector((state) => state.auth);
+  const { user, logout } = useAuth();
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useFetchPosts();
+
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    // Reset and fetch initial posts
-    dispatch(resetPosts());
-    dispatch(fetchPosts({ page: 0, size: 10 }));
-  }, [dispatch]);
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      dispatch(fetchPosts({ page: pagination.page + 1, size: pagination.size }));
-    }
-  };
+  // useMemo to flatten the pages array from useInfiniteQuery
+  const posts = useMemo(() => data?.pages.flatMap(page => page.content) ?? [], [data]);
 
   const handlePostCreated = () => {
-    // Refresh feed after creating post
-    dispatch(resetPosts());
-    dispatch(fetchPosts({ page: 0, size: 10 }));
+    // The usePostMutations hook already invalidates the query,
+    // so React Query will refetch automatically.
     setShowCreatePost(false);
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
   };
 
   const toggleProfileDropdown = () => {
@@ -103,8 +91,8 @@ const Feed = () => {
                 <hr />
                 <ul className="_nav_dropdown_list">
                   {/* Other dropdown items */}
-                  <li className="_nav_dropdown_list_item">
-                    <a href="#" onClick={handleLogout} className="_nav_dropdown_link">
+                  <li className="_nav_dropdown_list_item" onClick={logout}>
+                    <a href="#" className="_nav_dropdown_link">
                       <div className="_nav_drop_info">
                         <span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
@@ -240,7 +228,12 @@ const Feed = () => {
                           </div>
                           <hr className="_underline" />
                           <div className="_left_inner_event_bottom">
-                            <p className="_left_iner_event_bottom">17 People Going</p> <a href="#0" className="_left_iner_event_bottom_link">Going</a>
+                            <p className="_left_iner_event_bottom">17 People Going</p>
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Add logic for 'Going' action */ alert('Going to event!'); }}
+                              className="_left_iner_event_bottom_link"
+                            >Going
+                            </button>
                           </div>
                         </div>
                       </a>
@@ -366,10 +359,10 @@ const Feed = () => {
 
                     {/* Post List */}
                     <PostList
-                      posts={posts}
-                      loading={loading}
-                      hasMore={hasMore}
-                      onLoadMore={handleLoadMore}
+                      posts={posts || []}
+                      loading={isFetching || status === 'pending'}
+                      hasMore={hasNextPage}
+                      onLoadMore={fetchNextPage}
                     />
                   </div>
                 </div>

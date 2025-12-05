@@ -3,41 +3,30 @@
 // src/components/post/CreatePost.jsx
 // ==========================================
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { createPost } from '../../redux/slices/PostSlice';
+import { usePostMutations } from '../../hooks/usePosts';
 import '../../index.css';
+import { is } from 'date-fns/locale';
 
 const CreatePost = ({ onPostCreated, onCancel }) => {
-  const dispatch = useDispatch();
+  const { createPost, isCreatingPost } = usePostMutations();
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!content.trim()) {
       return;
     }
-
-    setLoading(true);
-    try {
-      await dispatch(createPost({
-        content: content.trim(),
-        imageUrl: imageUrl.trim() || null,
-        isPublic,
-      })).unwrap();
-      
-      setContent('');
-      setImageUrl('');
-      setIsPublic(true);
-      onPostCreated();
-    } catch (error) {
-      console.error('Failed to create post:', error);
-    } finally {
-      setLoading(false);
-    }
+    await createPost({
+      content: content.trim(),
+      imageUrl: imageUrl.trim() || null,
+      isPublic,
+    });
+    setContent('');
+    setImageUrl('');
+    setIsPublic(true);
+    onPostCreated();
   };
 
   return (
@@ -77,16 +66,16 @@ const CreatePost = ({ onPostCreated, onCancel }) => {
               type="button"
               className="cancel-button"
               onClick={onCancel}
-              disabled={loading}
+              disabled={isCreatingPost}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="submit-button"
-              disabled={loading || !content.trim()}
+              disabled={isCreatingPost || !content.trim()}
             >
-              {loading ? 'Posting...' : 'Post'}
+              {isCreatingPost ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>

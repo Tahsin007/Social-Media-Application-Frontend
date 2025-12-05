@@ -1,6 +1,3 @@
-// ==========================================
-// src/api/axios.js
-// ==========================================
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -79,11 +76,17 @@ axiosInstance.interceptors.response.use(
 
     try {
       // Call refresh token endpoint
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+      const response = await axiosInstance.post(`/auth/refresh`, {
         refreshToken,
       });
 
-      const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+      // The backend response seems to be nested under `response.data.data`
+      // Let's safely access it.
+      const responseData = response.data?.data;
+      if (!responseData || !responseData.accessToken) {
+        throw new Error("Invalid token refresh response");
+      }
+      const { accessToken, refreshToken: newRefreshToken } = responseData;
 
       // Store new tokens
       localStorage.setItem('accessToken', accessToken);
@@ -104,10 +107,11 @@ axiosInstance.interceptors.response.use(
       // Refresh token failed, logout user
       processQueue(refreshError, null);
       isRefreshing = false;
-      
-      localStorage.clear();
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       window.location.href = '/login';
-      
+
       return Promise.reject(refreshError);
     }
   }

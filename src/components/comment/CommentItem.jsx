@@ -1,22 +1,25 @@
 // src/components/comment/CommentItem.jsx
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { toggleCommentLike, deleteComment } from '../../redux/slices/CommentSlice';
 import CommentForm from './CommentForm';
 import { formatDistanceToNow } from 'date-fns';
 import './CommentItem.css';
+import { useCommentMutations, useFetchCommentLikes } from '../../hooks/useComments';
+import { useAuth } from '../../hooks/useAuth';
 
 const CommentItem = ({ comment, post, isReply = false }) => {
-    const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.auth);
+    const { deleteComment, toggleCommentLike, updateComment } =
+        useCommentMutations();
+    const { user: currentUser } = useAuth();
     const [showReplyForm, setShowReplyForm] = useState(false);
     const [showLikes, setShowLikes] = useState(false);
 
-    const isOwnComment = user?.id === comment.user.id;
+    const { data: likesData, isLoading: isLoadingLikes } = useFetchCommentLikes(comment.id, { enabled: showLikes });
+    const likedBy = likesData?.data || [];
+    const isOwnComment = currentUser?.data?.id === comment?.user?.id;
 
     const handleLike = async () => {
         try {
-            await dispatch(toggleCommentLike({ postId: post.id, commentId: comment.id })).unwrap();
+            await toggleCommentLike({ postId: post.id, commentId: comment.id });
         } catch (error) {
             console.error('Failed to toggle like:', error);
         }
@@ -25,10 +28,19 @@ const CommentItem = ({ comment, post, isReply = false }) => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this comment?')) {
             try {
-                await dispatch(deleteComment({ postId: post.id, commentId: comment.id })).unwrap();
+                await deleteComment({ postId: post.id, commentId: comment.id });
             } catch (error) {
                 console.error('Failed to delete comment:', error);
             }
+        }
+    };
+
+    const handleUpdate = async (newContent) => {
+        if (!newContent || newContent.trim() === comment.content) return;
+        try {
+            await updateComment({ postId: post.id, commentId: comment.id, commentData: { content: newContent } });
+        } catch (error) {
+            console.error('Failed to update comment:', error);
         }
     };
 
@@ -91,16 +103,20 @@ const CommentItem = ({ comment, post, isReply = false }) => {
                     )}
                 </div>
 
-                {showLikes && comment.likedBy && comment.likedBy.length > 0 && (
+                {showLikes && (
                     <div className="comment-likes-list">
-                        <p className="likes-title">Liked by:</p>
-                        <ul>
-                            {comment.likedBy.map((user) => (
-                                <li key={user.id}>
-                                    {user.firstName} {user.lastName}
-                                </li>
-                            ))}
-                        </ul>
+                        {isLoadingLikes ? (
+                            <p>Loading likes...</p>
+                        ) : (
+                            <>
+                                <p className="likes-title">Liked by:</p>
+                                <ul>
+                                    {likedBy.map((user) => (
+                                        <li key={user.id}>{user.firstName} {user.lastName}</li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
                     </div>
                 )}
 

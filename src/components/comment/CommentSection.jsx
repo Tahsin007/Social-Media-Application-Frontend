@@ -1,32 +1,55 @@
 
 // src/components/comment/CommentSection.jsx
 
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCommentsByPost } from '../../redux/slices/CommentSlice';
+import { useMemo } from 'react';
+import { useFetchComments } from '../../hooks/useComments';
 import CommentForm from './CommentForm';
 import CommentItem from './CommentItem';
 import './CommentSection.css';
 
-const CommentSection = ({ post }) => {
-    const dispatch = useDispatch();
-    const { commentsByPost, loading } = useSelector((state) => state.comments);
+// Helper function to build the comment tree
+const buildCommentTree = (comments) => {
+    const commentMap = {};
+    const rootComments = [];
 
-    const comments = commentsByPost[post.id] || [];
+    // First pass: create a map of all comments by their ID
+    comments.forEach(comment => {
+        commentMap[comment.id] = { ...comment, replies: [] };
+    });
+
+    // Second pass: link replies to their parents
+    comments.forEach(comment => {
+        if (comment.parentCommentId) {
+            const parent = commentMap[comment.parentCommentId];
+            if (parent) {
+                parent.replies.push(commentMap[comment.id]);
+            }
+        } else {
+            rootComments.push(commentMap[comment.id]);
+        }
+    });
+
+    return rootComments;
+};
+
+const CommentSection = ({ post }) => {
+    const { data: commentsResponse, isLoading: loading } = useFetchComments(post.id);
+    const flatComments = commentsResponse || [];
+    const nestedComments = useMemo(() => buildCommentTree(flatComments), [flatComments]);
 
     return (
         <div className="comment-section">
             <CommentForm post={post} />
-
-            {loading && comments.length === 0 ? (
+            {loading ? (
                 <div className="comments-loading">Loading comments...</div>
             ) : (
                 <div className="comments-list">
-                    {comments.length === 0 ? (
-                        <p className="no-comments">No comments yet. Be the first to comment!</p>
-                    ) : (
-                        comments.map((comment) => (
+                    {nestedComments && nestedComments.length > 0 ? (
+                        nestedComments.map((comment) => (
                             <CommentItem key={comment.id} comment={comment} post={post} />
                         ))
+                    ) : (
+                        <p className="no-comments">No comments yet. Be the first to comment!</p>
                     )}
                 </div>
             )}
