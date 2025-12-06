@@ -1,14 +1,10 @@
 
-// ==========================================
-// src/components/post/CreatePost.jsx
-// ==========================================
 import { useState } from 'react';
-import { usePostMutations } from '../../hooks/usePosts';
+import { usePostMutations } from '../../hooks/usePosts'; // Corrected hook name
 import '../../index.css';
-import { is } from 'date-fns/locale';
 
 const CreatePost = ({ onPostCreated, onCancel }) => {
-  const { createPost, isCreatingPost } = usePostMutations();
+  const { createPost, isCreating } = usePostMutations();
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isPublic, setIsPublic] = useState(true);
@@ -38,7 +34,7 @@ const CreatePost = ({ onPostCreated, onCancel }) => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows="4"
-          disabled={loading}
+          disabled={isCreating}
         />
 
         <input
@@ -47,7 +43,7 @@ const CreatePost = ({ onPostCreated, onCancel }) => {
           placeholder="Image URL (optional)"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          disabled={loading}
+          disabled={isCreating}
         />
 
         <div className="post-options">
@@ -56,7 +52,7 @@ const CreatePost = ({ onPostCreated, onCancel }) => {
               type="checkbox"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
-              disabled={loading}
+              disabled={isCreating}
             />
             <span>Public Post</span>
           </label>
@@ -66,16 +62,16 @@ const CreatePost = ({ onPostCreated, onCancel }) => {
               type="button"
               className="cancel-button"
               onClick={onCancel}
-              disabled={isCreatingPost}
+              disabled={isCreating}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="submit-button"
-              disabled={isCreatingPost || !content.trim()}
+              disabled={isCreating || !content.trim()}
             >
-              {isCreatingPost ? 'Posting...' : 'Post'}
+              {isCreating ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>

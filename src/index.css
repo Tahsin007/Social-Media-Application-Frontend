@@ -786,3 +786,53 @@ body {
   font-size: 14px;
   padding: 20px;
 }
+
+/* src/pages/UserProfile.css */
+.user-profile-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.user-profile-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.user-profile-info h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1c1e21;
+  margin: 0;
+}
+
+.user-profile-email {
+  font-size: 15px;
+  color: #65676b;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.user-profile-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.user-profile-stats span {
+  font-size: 15px;
+  color: #65676b;
+}
+
+.user-profile-stats span strong {
+  color: #1c1e21;
+  font-weight: 600;
+}
