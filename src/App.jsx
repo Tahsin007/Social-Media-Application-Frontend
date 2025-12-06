@@ -8,6 +8,7 @@ import PrivateRoute from './components/layout/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Feed from './pages/Feed';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const { user, isLoadingUser } = useAuth(); // This hook will try to fetch the user
@@ -38,6 +39,15 @@ function App() {
           element={
             <PrivateRoute>
               <Feed />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profile/:id"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
             </PrivateRoute>
           }
         />

@@ -1,5 +1,6 @@
 // src/pages/Feed.jsx
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useFetchPosts } from '../hooks/usePosts';
 import CreatePost from '../components/post/CreatePost';
@@ -17,6 +18,8 @@ const Feed = () => {
     isFetchingNextPage,
     status,
   } = useFetchPosts();
+
+  console.log("User data :" , user);
 
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -66,10 +69,10 @@ const Feed = () => {
             </ul>
             <div className="_header_nav_profile">
               <div className="_header_nav_profile_image">
-                <img src={user?.profilePictureUrl || "/assets/images/profile.png"} alt="Image" className="_nav_profile_img" />
+                <img src={user.profilePictureUrl || "/assets/images/profile.png"} alt="Image" className="_nav_profile_img" />
               </div>
               <div className="_header_nav_dropdown" onClick={toggleProfileDropdown}>
-                <p className="_header_nav_para">{user ? `${user.firstName} ${user.lastName}` : 'Guest'}</p>
+                <p className="_header_nav_para">{user ? `${user?.firstName} ${user?.lastName}` : 'Guest'}</p>
                 <button id="_profile_drop_show_btn" className="_header_nav_dropdown_btn _dropdown_toggle" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" fill="none" viewBox="0 0 10 6">
                     <path fill="#112032" d="M5 5l.354.354L5 5.707l-.354-.353L5 5zm4.354-3.646l-4 4-.708-.708 4-4 .708.708zm-4.708 4l-4-4 .708-.708 4 4-.708.708z" />
@@ -82,10 +85,10 @@ const Feed = () => {
                     <img src={user?.profilePictureUrl || "/assets/images/profile.png"} alt="Image" className="_nav_drop_img" />
                   </div>
                   <div className="_nav_profile_dropdown_info_txt">
-                    <h4 className="_nav_dropdown_title">{user ? `${user.firstName} ${user.lastName}` : 'Guest'}</h4>
-                    <a href="/profile" className="_nav_drop_profile">
+                    <h4 className="_nav_dropdown_title">{user ? `${user?.firstName} ${user?.lastName}` : 'Guest'}</h4>
+                    <Link to={`/profile/${user?.id}`} className="_nav_drop_profile">
                       View Profile
-                    </a>
+                    </Link>
                   </div>
                 </div>
                 <hr />

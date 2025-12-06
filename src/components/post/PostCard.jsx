@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
 import CommentSection from '../comment/CommentSection';
 import EditPostModal from './EditPostModal';
 import { useAuth } from '../../hooks/useAuth';
@@ -39,10 +40,7 @@ const PostCard = ({ post }) => {
             await deletePost(id);
         }
     };
-    console.log("currentUser:", currentUser);
-    console.log("user:", user);
-
-    const isOwnPost = currentUser && user && currentUser.data.id === user.id;
+    const isOwnPost = currentUser && user && currentUser.id === user.id;
 
     const toggleDropdown = () => setShowDropdown(!showDropdown);
 
@@ -51,17 +49,19 @@ const PostCard = ({ post }) => {
             <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
                 <div className="_feed_inner_timeline_content _padd_r24 _padd_l24">
                     <div className="_feed_inner_timeline_post_top">
-                        <div className="_feed_inner_timeline_post_box">
-                            <div className="_feed_inner_timeline_post_box_image">
-                                <img src={user?.profilePictureUrl || "/assets/images/post_img.png"} alt={user?.firstName} className="_post_img" />
+                        <Link to={`/profile/${user.id}`} className="user-profile-link">
+                            <div className="_feed_inner_timeline_post_box">
+                                <div className="_feed_inner_timeline_post_box_image">
+                                    <img src={user?.profilePictureUrl || "/assets/images/post_img.png"} alt={user?.firstName} className="_post_img" />
+                                </div>
+                                <div className="_feed_inner_timeline_post_box_txt">
+                                    <h4 className="_feed_inner_timeline_post_box_title">{user ? `${user.firstName} ${user.lastName}` : 'Unknown User'}</h4>
+                                    <p className="_feed_inner_timeline_post_box_para">
+                                        {createdAt ? `${formatDistanceToNow(new Date(createdAt))} ago` : ''} · <span>{isPublic ? 'Public' : 'Private'}</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div className="_feed_inner_timeline_post_box_txt">
-                                <h4 className="_feed_inner_timeline_post_box_title">{user ? `${user.firstName} ${user.lastName}` : 'Unknown User'}</h4>
-                                <p className="_feed_inner_timeline_post_box_para">
-                                    {createdAt ? `${formatDistanceToNow(new Date(createdAt))} ago` : ''} · <a href="#0">{isPublic ? 'Public' : 'Private'}</a>
-                                </p>
-                            </div>
-                        </div>
+                        </Link>
                         {isOwnPost && (
                             <div className="_feed_inner_timeline_post_box_dropdown">
                                 <div className="_feed_timeline_post_dropdown">

@@ -1,4 +1,5 @@
 // src/components/layout/Navbar.jsx
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import '../../index.css';
 
@@ -17,15 +18,18 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-menu">
-          <div className="navbar-user">
-            <span className="user-name">
-              {user?.firstName} {user?.lastName}
-            </span>
-            <div className="user-avatar">
-              {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-            </div>
-          </div>
-
+          {user && (
+            <Link to={`/profile/${user.id}`} className="navbar-user-link">
+              <div className="navbar-user">
+                <span className="user-name">
+                  {user.firstName} {user.lastName}
+                </span>
+                <div className="user-avatar">
+                  {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                </div>
+              </div>
+            </Link>
+          )}
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
